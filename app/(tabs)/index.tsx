@@ -1,30 +1,49 @@
-import { Image, StyleSheet, Platform, View, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  StatusBar,
+  useColorScheme,
+} from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import VehicleMap from "../screens/VehicleScreen";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { ThemedText } from "@/components/ThemedText";
+import BusLines from "../screens/BusLinesScreen";
+import ShowScreen from "../screens/ShowScreen";
 
 export default function HomeScreen() {
+  const colorScheme = useColorScheme();
   return (
-    <ThemedView style={styles.container}>
-      <Text style={styles.titleContaine}>Olho Vivo Bus</Text>
-    </ThemedView>
+    <>
+      <ThemedView style={styles.container}>
+        <StatusBar barStyle={"dark-content"} />
+        <Text style={styles.titleContainer}>Olho Vivo Bus</Text>
+      </ThemedView>
+      {/* <ShowScreen /> */}
+      <VehicleMap />
+      <BusLines />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#4c1bd5",
+    width: "100%",
   },
-  titleContaine: {
-    flexDirection: "row",
+  titleContainer: {
+    // flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#5f557b",
+    // backgroundColor: "#5f557b",
     textAlign: "center",
-    margin: 25,
+    marginTop: 35,
     fontSize: 22,
-    color: "#fff",
+    color: "#0000f8",
+    width: "100%",
   },
 });
