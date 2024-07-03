@@ -4,7 +4,7 @@
     "slug": "olho_vivo_bus",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/aiko.png",
+    "icon": "./assets/images/react-logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/aiko.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.matheusfabio.olho_vivo_bus"

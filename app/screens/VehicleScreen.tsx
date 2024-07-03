@@ -23,7 +23,7 @@ const VehicleMap = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       const token =
-        "0330629571cb529677755317957f82072f0fc671d51783ecd8f874cd872c363b";
+        "0330629571cb529677755317957f82072f0fc671d517836139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3cd8f874cd872c363b";
       try {
         const response = await fetch(
           "https://api.olhovivo.sptrans.com.br/v2.1/Posicao",

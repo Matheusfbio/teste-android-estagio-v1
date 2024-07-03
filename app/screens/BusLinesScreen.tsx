@@ -19,29 +19,36 @@ const BusLinesScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const token =
+      "6139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3";
     const fetchBusLines = async () => {
       try {
         const response = await fetch(
-          "https://api.olhovivo.sptrans.com.br/v2.1/Linha/Buscar",
+          "https://api.olhovivo.sptrans.com.br/v2.1/Linha/BuscarLinhaSentido?termosBusca=800&sentido=2",
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer 0330629571cb529677755317957f82072f0fc671d51783ecd8f874cd872c363b", // Substitua 'SEU_TOKEN_DE_ACESSO' pelo seu token real
+              Authorization: `Bearer ${token}`, // Substitua 'SEU_TOKEN_DE_ACESSO' pelo seu token real
             },
           }
         );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          console.error(
+            `HTTP error! status: ${response.status}, message: ${errorText}`
+          );
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText}`
+          );
         }
 
         const json: BusLine[] = await response.json();
         console.log("API Response:", json);
         setBusLines(json);
       } catch (error) {
-        // console.error("Fetch Error:", error);
+        console.error("Fetch Error:", error);
         if (error instanceof Error) {
           setError(error.message);
         } else {
