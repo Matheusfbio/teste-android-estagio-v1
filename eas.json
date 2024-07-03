@@ -6,6 +6,11 @@
     "production": {
       "channel": "production"
     },
+    "android": {
+      "distribution": "internal",
+      "withoutCredentials": true,
+      "gradleCommand": ":app:assembleDebug"
+    },
     "preview": {
       "channel": "preview",
       "distribution": "internal"

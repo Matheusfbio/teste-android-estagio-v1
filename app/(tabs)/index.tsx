@@ -25,9 +25,8 @@ export default function HomeScreen() {
         <StatusBar barStyle={"dark-content"} />
         <Text style={styles.titleContainer}>Olho Vivo Bus</Text>
       </ThemedView>
-      {/* <ShowScreen /> */}
       <VehicleMap />
-      <BusLines />
+      {/* <BusLines /> */}
     </>
   );
 }

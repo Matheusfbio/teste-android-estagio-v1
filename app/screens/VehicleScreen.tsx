@@ -1,7 +1,14 @@
-// components/VehicleMap.js
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+  Button,
+  Alert,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
 
 interface Vehicle {
   py: number; // latitude
@@ -19,11 +26,33 @@ const VehicleMap = () => {
     longitudeDelta: 0.0421,
   });
   const [loading, setLoading] = useState(true);
+  const mapRef = useRef<MapView>(null); // Referência para o componente MapView
 
   useEffect(() => {
+    const getLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+
+      // Anima o mapa para a nova região
+      mapRef.current?.animateToRegion(region, 1000);
+    };
+
+    getLocation();
+
     const fetchVehicles = async () => {
       const token =
-        "0330629571cb529677755317957f82072f0fc671d517836139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3cd8f874cd872c363b";
+        "6139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3";
       try {
         const response = await fetch(
           "https://api.olhovivo.sptrans.com.br/v2.1/Posicao",
@@ -46,7 +75,20 @@ const VehicleMap = () => {
     };
 
     fetchVehicles();
+
+    // Atualiza a localização do usuário a cada 10 segundos
+    const intervalId = setInterval(() => {
+      getLocation();
+    }, 10000); // a cada 10 segundos
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
+
+  const handleRefreshLocation = () => {
+    getLocation();
+  };
 
   if (loading) {
     return (
@@ -59,18 +101,28 @@ const VehicleMap = () => {
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} region={region}>
-        {vehicles.map((vehicle, index) => (
-          <Marker
-            key={index}
-            coordinate={{
-              latitude: vehicle.py, // 'py' é a latitude
-              longitude: vehicle.px, // 'px' é a longitude
-            }}
-            title={`Vehicle ${vehicle.p}`}
-            description={`Last updated: ${vehicle.u}`}
-          />
-        ))}
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        region={region}
+        showsUserLocation={true}
+        followsUserLocation={true}
+      >
+        {vehicles.map(
+          (vehicle, index) =>
+            typeof vehicle.py === "number" &&
+            typeof vehicle.px === "number" && (
+              <Marker
+                key={index}
+                coordinate={{
+                  latitude: vehicle.py,
+                  longitude: vehicle.px,
+                }}
+                title={`Vehicle ${vehicle.p}`}
+                description={`Last updated: ${vehicle.u}`}
+              />
+            )
+        )}
       </MapView>
     </View>
   );
@@ -91,6 +143,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  button: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
   },
 });
 
