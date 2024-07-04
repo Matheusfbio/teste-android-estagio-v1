@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/images/aiko.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.matheusfabio.olho_vivo_bus"
+      "package": "com.matheusfabio.olho_vivo_bus",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -40,9 +41,7 @@
       }
     },
     "owner": "matheusfabio",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "exposdk:51.0.0",
     "updates": {
       "url": "https://u.expo.dev/27831d09-f2d1-40db-ba3e-c34d152a7706"
     }

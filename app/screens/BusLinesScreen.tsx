@@ -5,18 +5,20 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 interface BusLine {
-  id: number;
-  nome: string;
-  codigo: string;
-  latitude?: number; // Supondo que você tenha latitude e longitude
-  longitude?: number; // Adicione estas propriedades se não existirem
+  cl: number;
+  lt: string;
+  sl: number;
+  tl: number;
+  tp: string;
+  ts: string;
 }
 
-const BusLinesScreen: React.FC = () => {
+const BusLines = () => {
   const [busLines, setBusLines] = useState<BusLine[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +26,7 @@ const BusLinesScreen: React.FC = () => {
   useEffect(() => {
     const token =
       "6139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3";
+
     const fetchBusLines = async () => {
       try {
         // Primeira chamada para autenticação
@@ -40,9 +43,6 @@ const BusLinesScreen: React.FC = () => {
 
         if (!authResponse.ok) {
           const errorText = await authResponse.text();
-          console.error(
-            `Erro na autenticação! status: ${authResponse.status}, message: ${errorText}`
-          );
           throw new Error(
             `Erro na autenticação! status: ${authResponse.status}, message: ${errorText}`
           );
@@ -50,7 +50,7 @@ const BusLinesScreen: React.FC = () => {
 
         // Segunda chamada para buscar as linhas de ônibus
         const response = await fetch(
-          "https://api.olhovivo.sptrans.com.br/v2.1/Linha/BuscarLinhaSentido?termosBusca=800&sentido=2",
+          "https://api.olhovivo.sptrans.com.br/v2.1/Linha/BuscarLinhaSentido?termosBusca=800&sentido=1",
           {
             method: "GET",
             headers: {
@@ -62,31 +62,27 @@ const BusLinesScreen: React.FC = () => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(
-            `HTTP error! status: ${response.status}, message: ${errorText}`
-          );
           throw new Error(
             `HTTP error! status: ${response.status}, message: ${errorText}`
           );
         }
 
         const json: BusLine[] = await response.json();
-        console.log("API Response:", json);
         setBusLines(json);
       } catch (error) {
         console.error("Fetch Error:", error);
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError("Ocorreu um erro desconhecido");
-        }
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Ocorreu um erro desconhecido"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchBusLines();
-  }, []);
+  }, []); // Dependência vazia, executa apenas uma vez após a montagem inicial do componente
 
   if (loading) {
     return (
@@ -100,7 +96,7 @@ const BusLinesScreen: React.FC = () => {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text>Erro: {error}</Text>
+        <Text>Error: {error}</Text>
       </View>
     );
   }
@@ -109,35 +105,19 @@ const BusLinesScreen: React.FC = () => {
     <View style={styles.container}>
       <FlatList
         data={busLines}
-        keyExtractor={(item) =>
-          item.id ? item.id.toString() : Math.random().toString()
-        }
+        keyExtractor={(item, index) => `${item.cl}-${index}`}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.title}>{item.nome}</Text>
-            <Text>{item.codigo}</Text>
-            {item.latitude && item.longitude ? (
-              <MapView
-                style={styles.map}
-                initialRegion={{
-                  latitude: item.latitude,
-                  longitude: item.longitude,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  }}
-                  title={item.nome}
-                />
-              </MapView>
-            ) : (
-              <Text>Localização não disponível</Text>
-            )}
-          </View>
+          <SafeAreaView style={styles.item}>
+            <View style={styles.title}>
+              <Text>{item.lt}</Text>
+              <Text>
+                {item.tp} {item.ts}
+              </Text>
+              <Text>
+                {item.cl} - {item.lt} - {item.tl}
+              </Text>
+            </View>
+          </SafeAreaView>
         )}
       />
     </View>
@@ -152,18 +132,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   item: {
-    backgroundColor: "#f9c2ff",
+    backgroundColor: "#14e039",
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
   },
   title: {
-    fontSize: 32,
-  },
-  map: {
-    width: "100%",
-    height: 200,
+    fontSize: 24,
+    fontWeight: "bold",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-export default BusLinesScreen;
+export default BusLines;

@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import VehicleMap from "../screens/VehicleScreen";
+import BusStopMap from "../screens/BusStopMapScreen";
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -16,7 +17,7 @@ export default function HomeScreen() {
         <StatusBar barStyle={"dark-content"} />
         <Text style={styles.titleContainer}>Olho Vivo Bus</Text>
       </View>
-      <VehicleMap />
+      <BusStopMap lineCode={0} baseUrl={""} />
     </>
   );
 }
@@ -26,7 +27,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   titleContainer: {
+    // flexDirection: "row",
     alignItems: "center",
+    // backgroundColor: "#5f557b",
     textAlign: "center",
     marginTop: 30,
     fontSize: 22,

@@ -1,38 +1,40 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, Image, Platform, SafeAreaView, Text } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  Platform,
+  SafeAreaView,
+  Text,
+  View,
+} from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import BusLinesScreen from "../screens/BusLinesScreen";
+import BusLines from "../screens/BusLinesScreen";
 
 export default function ExploreScreen() {
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView>
         <Text style={styles.titleContainer}>Explore</Text>
       </SafeAreaView>
-    </ThemedView>
+      <BusLines />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
   container: {
     flex: 1,
-    backgroundColor: "#d5501b",
+    backgroundColor: "#ffffff",
   },
   titleContainer: {
-    // flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#22ba11",
     textAlign: "center",
-    marginTop: 35,
+    marginTop: 30,
     fontSize: 22,
-    color: "#fff",
+    color: "#0000f8",
     width: "100%",
   },
 });
