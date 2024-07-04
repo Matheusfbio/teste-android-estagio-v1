@@ -54,7 +54,6 @@ npm start
 
 clique na letra S do seu teclado para executar o projeto com Expo Go.
 O projeto independente do dispositivo ele via baixar o Expo Go e depois ele executar o projeto.
-
 E pronto, agora só testar o app.
 
 ## observações
