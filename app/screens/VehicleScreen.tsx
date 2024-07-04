@@ -1,58 +1,63 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ActivityIndicator,
-  Button,
-  Alert,
-} from "react-native";
+import { StyleSheet, View, Text, ActivityIndicator, Alert } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
-interface Vehicle {
-  py: number; // latitude
+interface VehiclePosition {
   px: number; // longitude
+  py: number; // latitude
   p: string; // some property, e.g., id or name
-  u: string; // last updated timestamp
+  ta: string; // last updated timestamp
+}
+
+interface Vehicle {
+  c: string; // some property, e.g., id or name
+  vs: VehiclePosition[];
 }
 
 const VehicleMap = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [region, setRegion] = useState({
-    latitude: -23.55052,
-    longitude: -46.633308,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState<VehiclePosition[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null); // Referência para o componente MapView
 
   useEffect(() => {
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission to access location was denied");
-        return;
+    const token =
+      "6139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3";
+
+    const authenticate = async () => {
+      try {
+        const authResponse = await fetch(
+          `https://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar?token=${token}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token }),
+          }
+        );
+
+        if (!authResponse.ok) {
+          const errorText = await authResponse.text();
+          console.error(
+            `Error na autenticação! status: ${authResponse.status}, message: ${errorText}`
+          );
+          throw new Error(
+            `Error na autenticação! status: ${authResponse.status}, message: ${errorText}`
+          );
+        }
+
+        console.log("Autenticação bem-sucedida!");
+      } catch (error) {
+        console.error("Erro ao autenticar na API:", error);
+        setError(
+          error instanceof Error ? error.message : "Error ao autenticar na API"
+        );
       }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
-
-      // Anima o mapa para a nova região
-      mapRef.current?.animateToRegion(region, 1000);
     };
 
-    getLocation();
-
     const fetchVehicles = async () => {
-      const token =
-        "6139d58e7b6e874fc32994d53dfb25b453a27a07a900b2047fb093c622ce4ee3";
       try {
         const response = await fetch(
           "https://api.olhovivo.sptrans.com.br/v2.1/Posicao",
@@ -63,32 +68,59 @@ const VehicleMap = () => {
             },
           }
         );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(
+            `Error ao buscar dados da API! status: ${response.status}, message: ${errorText}`
+          );
+          throw new Error(
+            `Error ao buscar dados da API! status: ${response.status}, message: ${errorText}`
+          );
+        }
+
         const data = await response.json();
         if (data.l) {
-          setVehicles(data.l); // Supondo que a lista de veículos está em 'data.l'
+          const allVehiclePositions = data.l.flatMap(
+            (vehicle: Vehicle) => vehicle.vs
+          );
+          console.log("Dados dos veículos recebidos");
+          setVehicles(allVehiclePositions);
+        } else {
+          console.log("Nenhum dado de veículo encontrado.");
         }
       } catch (error) {
-        console.error("Erro ao buscar dados da API:", error);
+        console.error("Error ao buscar dados da API:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Error ao buscar dados da API"
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVehicles();
+    const getLocationAndFetchVehicles = async () => {
+      await authenticate();
+      await fetchVehicles();
+    };
 
-    // Atualiza a localização do usuário a cada 10 segundos
+    getLocationAndFetchVehicles();
+
+    // Atualiza os veículos a cada 30 segundos
     const intervalId = setInterval(() => {
-      getLocation();
-    }, 10000); // a cada 10 segundos
+      getLocationAndFetchVehicles();
+    }, 30000);
 
     return () => {
       clearInterval(intervalId);
     };
   }, []);
 
-  const handleRefreshLocation = () => {
-    getLocation();
-  };
+  useEffect(() => {
+    // console.log("Veículos atualizados:", vehicles);
+  }, [vehicles]);
 
   if (loading) {
     return (
@@ -99,30 +131,40 @@ const VehicleMap = () => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Erro: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        region={region}
+        initialRegion={{
+          latitude: -23.55052,
+          longitude: -46.633308,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
         showsUserLocation={true}
         followsUserLocation={true}
       >
-        {vehicles.map(
-          (vehicle, index) =>
-            typeof vehicle.py === "number" &&
-            typeof vehicle.px === "number" && (
-              <Marker
-                key={index}
-                coordinate={{
-                  latitude: vehicle.py,
-                  longitude: vehicle.px,
-                }}
-                title={`Vehicle ${vehicle.p}`}
-                description={`Last updated: ${vehicle.u}`}
-              />
-            )
-        )}
+        {vehicles.map((vehicle, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: vehicle.py,
+              longitude: vehicle.px,
+            }}
+            title={`Veículo ${vehicle.p}`}
+            description={`Última atualização: ${vehicle.ta}`}
+            pinColor="red"
+          />
+        ))}
       </MapView>
     </View>
   );
@@ -143,11 +185,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  button: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
   },
 });
 

@@ -4,14 +4,12 @@
   },
   "build": {
     "production": {
-      "channel": "production"
-    },
-    "android": {
-      "distribution": "internal",
-      "withoutCredentials": true,
-      "gradleCommand": ":app:assembleDebug"
+      "developmentClient": true,
+      "channel": "production",
+      "distribution": "internal"
     },
     "preview": {
+      "developmentClient": true,
       "channel": "preview",
       "distribution": "internal"
     },
